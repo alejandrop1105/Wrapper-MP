@@ -69,6 +69,23 @@ namespace MercadoPago.Wrapper
         /// <summary>Marketplace / Split payments.</summary>
         public IMarketplaceService Marketplace { get; }
 
+        // ─── Nuevos módulos ───
+
+        /// <summary>Recursos del sitio: métodos de pago, tipos de doc, cuotas.</summary>
+        public ISiteService Site { get; }
+
+        /// <summary>Merchant Orders (órdenes de comercio).</summary>
+        public IMerchantOrderService MerchantOrders { get; }
+
+        /// <summary>Información de cuenta y balance.</summary>
+        public IAccountService Account { get; }
+
+        /// <summary>Contracargos (chargebacks).</summary>
+        public IChargebackService Chargebacks { get; }
+
+        /// <summary>Desembolsos (advanced payments).</summary>
+        public IDisbursementService Disbursements { get; }
+
         /// <summary>Webhook listener embebido.</summary>
         public WebhookListener WebhookListener { get; private set; }
 
@@ -101,6 +118,13 @@ namespace MercadoPago.Wrapper
             PointDevices = new PointDeviceService(_httpClient);
             Subscriptions = new SubscriptionService(_httpClient);
             Marketplace = new MarketplaceService(_httpClient);
+
+            // Nuevos módulos
+            Site = new SiteService(_httpClient);
+            MerchantOrders = new MerchantOrderService(_httpClient);
+            Account = new AccountService(_httpClient, userId ?? "me");
+            Chargebacks = new ChargebackService(_httpClient);
+            Disbursements = new DisbursementService(_httpClient);
 
             _logger.Information(
                 "MpWrapperClient inicializado. Entorno={Environment}, País={Country}",

@@ -57,6 +57,7 @@ namespace MercadoPago.Demo.WinForms.Forms
             _tabControl.TabPages.Add(CreateQrSalesTab());
             _tabControl.TabPages.Add(CreateStoresTab());
             _tabControl.TabPages.Add(CreateCustomersTab());
+            _tabControl.TabPages.Add(CreateAccountTab());
             _tabControl.TabPages.Add(CreateOperationLogTab());
             _tabControl.TabPages.Add(CreateWebhookTab());
 
@@ -167,6 +168,13 @@ namespace MercadoPago.Demo.WinForms.Forms
         {
             var tab = new TabPage("👤 Clientes");
             tab.Controls.Add(new CustomersPanel(this) { Dock = DockStyle.Fill });
+            return tab;
+        }
+
+        private TabPage CreateAccountTab()
+        {
+            var tab = new TabPage("🏦 Cuenta / Recursos");
+            tab.Controls.Add(new AccountPanel(this) { Dock = DockStyle.Fill });
             return tab;
         }
 

@@ -158,6 +158,20 @@ namespace MercadoPago.Demo.WinForms.Forms
                 "Nombre de la sucursal:", "Nueva Sucursal", "Sucursal Demo");
             if (string.IsNullOrEmpty(name)) return;
 
+            var street = Microsoft.VisualBasic.Interaction.InputBox(
+                "Calle:", "Ubicación", "Av. Corrientes");
+            if (string.IsNullOrEmpty(street)) return;
+
+            var number = Microsoft.VisualBasic.Interaction.InputBox(
+                "Número:", "Ubicación", "1234");
+
+            var city = Microsoft.VisualBasic.Interaction.InputBox(
+                "Ciudad (del catálogo MP, ej: La Plata, Mar del Plata, Quilmes):",
+                "Ubicación", "La Plata");
+
+            var state = Microsoft.VisualBasic.Interaction.InputBox(
+                "Provincia/Estado:", "Ubicación", "Buenos Aires");
+
             try
             {
                 _main.SetStatus("Creando sucursal...");
@@ -165,7 +179,16 @@ namespace MercadoPago.Demo.WinForms.Forms
                     new StoreCreateRequest
                     {
                         Name = name,
-                        ExternalId = "store-" + DateTime.Now.Ticks
+                        ExternalId = "store-" + DateTime.Now.Ticks,
+                        Location = new StoreLocationRequest
+                        {
+                            StreetName = street,
+                            StreetNumber = number,
+                            CityName = city,
+                            StateName = state,
+                            Latitude = -34.603722,
+                            Longitude = -58.381592
+                        }
                     });
 
                 _txtResult.Text = result.IsSuccess

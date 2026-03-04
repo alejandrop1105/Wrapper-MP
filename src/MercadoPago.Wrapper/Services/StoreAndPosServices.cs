@@ -38,7 +38,7 @@ namespace MercadoPago.Wrapper.Services
             CancellationToken ct = default)
         {
             return await _http.GetAsync<StoreSearchResponse>(
-                $"/users/{_userId}/stores", ct);
+                $"/users/{_userId}/stores/search", ct);
         }
 
         public async Task<MpApiResponse<StoreResponse>> UpdateAsync(
