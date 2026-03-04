@@ -54,6 +54,7 @@ namespace MercadoPago.Demo.WinForms.Forms
             // Crear tabs
             _tabControl.TabPages.Add(CreateConfigTab());
             _tabControl.TabPages.Add(CreatePaymentsTab());
+            _tabControl.TabPages.Add(CreateQrSalesTab());
             _tabControl.TabPages.Add(CreateStoresTab());
             _tabControl.TabPages.Add(CreateCustomersTab());
             _tabControl.TabPages.Add(CreateOperationLogTab());
@@ -145,6 +146,13 @@ namespace MercadoPago.Demo.WinForms.Forms
         {
             var tab = new TabPage("💳 Pagos");
             tab.Controls.Add(new PaymentsPanel(this) { Dock = DockStyle.Fill });
+            return tab;
+        }
+
+        private TabPage CreateQrSalesTab()
+        {
+            var tab = new TabPage("📱 Venta QR Caja");
+            tab.Controls.Add(new QrSalesPanel(this) { Dock = DockStyle.Fill });
             return tab;
         }
 
