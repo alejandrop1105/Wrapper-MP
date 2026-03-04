@@ -609,8 +609,23 @@ namespace MercadoPago.Demo.WinForms.Forms
                 }
                 else
                 {
-                    ShowResult($"Respuesta: {result.StatusCode}\n{result.RawJson}");
-                    SetOrderStatus("⚪ Sin orden activa", Color.Gray);
+                    // Si la caja ya estaba limpia, MP devuelve 400
+                    var alreadyClean = result.RawJson != null &&
+                        result.RawJson.Contains("in_store_order_delete_error");
+
+                    if (alreadyClean)
+                    {
+                        ShowResult($"ℹ La caja '{cashier.Name}' ya estaba limpia " +
+                            "(no tenía una orden QR activa).\n" +
+                            "Puede enviar una nueva orden sin problema.");
+                        SetOrderStatus("⚪ Caja limpia", Color.Gray);
+                        _main.SetStatus("La caja ya estaba limpia.");
+                    }
+                    else
+                    {
+                        ShowResult($"Respuesta: {result.StatusCode}\n{result.RawJson}");
+                        SetOrderStatus("⚪ Sin orden activa", Color.Gray);
+                    }
                 }
             }
             catch (Exception ex)

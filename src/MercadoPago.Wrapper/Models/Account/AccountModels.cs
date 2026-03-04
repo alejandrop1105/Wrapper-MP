@@ -133,19 +133,7 @@ namespace MercadoPago.Wrapper.Models.Account
         public string SiteStatus { get; set; }
 
         [JsonProperty("list")]
-        public UserSiteStatusList List { get; set; }
-    }
-
-    public class UserSiteStatusList
-    {
-        [JsonProperty("allow")]
-        public bool Allow { get; set; }
-
-        [JsonProperty("codes")]
-        public List<string> Codes { get; set; }
-
-        [JsonProperty("immediate_payment")]
-        public bool ImmediatePayment { get; set; }
+        public object List { get; set; }
     }
 
     /// <summary>Balance de la cuenta de MercadoPago.</summary>

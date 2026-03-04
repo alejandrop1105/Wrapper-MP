@@ -81,8 +81,9 @@ namespace MercadoPago.Demo.WinForms.Forms
             var cashierHeader = new FlowLayoutPanel
             {
                 Dock = DockStyle.Top,
-                Height = 45,
-                AutoSize = false
+                Height = 100,
+                AutoSize = false,
+                WrapContents = true
             };
             cashierHeader.Controls.Add(new Label
             {
@@ -95,7 +96,9 @@ namespace MercadoPago.Demo.WinForms.Forms
             btnLoadCashiers.Click += BtnLoadCashiers_Click;
             var btnCreateCashier = CreateButton("+ Crear", Color.FromArgb(40, 167, 69));
             btnCreateCashier.Click += BtnCreateCashier_Click;
-            cashierHeader.Controls.AddRange(new Control[] { btnLoadCashiers, btnCreateCashier });
+            var btnViewQr = CreateButton("🖨 Ver QR", Color.FromArgb(156, 39, 176));
+            btnViewQr.Click += BtnViewQr_Click;
+            cashierHeader.Controls.AddRange(new Control[] { btnLoadCashiers, btnCreateCashier, btnViewQr });
 
             _gridCashiers = new DataGridView
             {
@@ -179,7 +182,7 @@ namespace MercadoPago.Demo.WinForms.Forms
                     new StoreCreateRequest
                     {
                         Name = name,
-                        ExternalId = "store-" + DateTime.Now.Ticks,
+                        ExternalId = "store" + DateTime.Now.Ticks,
                         Location = new StoreLocationRequest
                         {
                             StreetName = street,
@@ -229,8 +232,30 @@ namespace MercadoPago.Demo.WinForms.Forms
         private async void BtnCreateCashier_Click(object sender, EventArgs e)
         {
             if (_main.MpClient == null) return;
+
+            // La caja debe estar asociada a una sucursal
+            if (_gridStores.SelectedRows.Count == 0 || _gridStores.DataSource == null)
+            {
+                MessageBox.Show(
+                    "Primero cargue las sucursales y seleccione una en la grilla.",
+                    "Sucursal requerida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Obtener store_id de la fila seleccionada
+            var storeRow = _gridStores.SelectedRows[0];
+            var storeId = storeRow.DataBoundItem?.GetType()
+                .GetProperty("Id")?.GetValue(storeRow.DataBoundItem)?.ToString();
+
+            if (string.IsNullOrEmpty(storeId))
+            {
+                MessageBox.Show("No se pudo obtener el ID de la sucursal seleccionada.",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             var name = Microsoft.VisualBasic.Interaction.InputBox(
-                "Nombre de la caja:", "Nueva Caja", "Caja 1");
+                $"Nombre de la caja (Sucursal ID: {storeId}):", "Nueva Caja", "Caja 1");
             if (string.IsNullOrEmpty(name)) return;
 
             try
@@ -240,7 +265,8 @@ namespace MercadoPago.Demo.WinForms.Forms
                     new PosCreateRequest
                     {
                         Name = name,
-                        ExternalId = "pos-" + DateTime.Now.Ticks,
+                        ExternalId = "pos" + DateTime.Now.Ticks,
+                        StoreId = storeId,
                         FixedAmount = false
                     });
 
@@ -252,6 +278,67 @@ namespace MercadoPago.Demo.WinForms.Forms
             catch (Exception ex)
             {
                 _txtResult.Text = $"Error: {ex.Message}";
+            }
+        }
+
+        private async void BtnViewQr_Click(object sender, EventArgs e)
+        {
+            if (_main.MpClient == null) return;
+            if (_gridCashiers.SelectedRows.Count == 0 || _gridCashiers.DataSource == null)
+            {
+                MessageBox.Show("Primero cargue las cajas y seleccione una.",
+                    "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var row = _gridCashiers.SelectedRows[0];
+            var posId = row.DataBoundItem?.GetType()
+                .GetProperty("Id")?.GetValue(row.DataBoundItem);
+            if (posId == null) return;
+
+            try
+            {
+                _main.SetStatus("Obteniendo QR de la caja...");
+                var result = await _main.MpClient.Cashiers.GetAsync((long)posId);
+
+                if (result.IsSuccess && result.Data?.Qr != null)
+                {
+                    var qr = result.Data.Qr;
+                    var info = $"═══ QR de la Caja: {result.Data.Name} ═══\n\n" +
+                        $"🖼 Imagen QR: {qr.Image ?? "N/A"}\n" +
+                        $"📄 Template documento: {qr.TemplateDocument ?? "N/A"}\n" +
+                        $"🖼 Template imagen: {qr.TemplateImage ?? "N/A"}\n\n" +
+                        JsonConvert.SerializeObject(result.Data, Formatting.Indented);
+
+                    _txtResult.Text = info;
+
+                    // Abrir la imagen QR en el navegador para imprimir
+                    var qrUrl = qr.Image ?? qr.TemplateImage;
+                    if (!string.IsNullOrEmpty(qrUrl))
+                    {
+                        var open = MessageBox.Show(
+                            $"¿Desea abrir la imagen QR en el navegador para imprimirla?\n\n{qrUrl}",
+                            "Imprimir QR", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (open == DialogResult.Yes)
+                            System.Diagnostics.Process.Start(qrUrl);
+                    }
+
+                    _main.SetStatus($"QR obtenido para caja '{result.Data.Name}'.");
+                }
+                else if (result.IsSuccess)
+                {
+                    _txtResult.Text = "La caja no tiene un QR asignado.\n" +
+                        JsonConvert.SerializeObject(result.Data, Formatting.Indented);
+                }
+                else
+                {
+                    _txtResult.Text = $"❌ Error: {result.ErrorMessage}\n{result.RawJson}";
+                }
+            }
+            catch (Exception ex)
+            {
+                _txtResult.Text = $"Error: {ex.Message}";
+                Log.Error(ex, "Error obteniendo QR.");
             }
         }
 

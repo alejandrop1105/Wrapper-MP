@@ -56,6 +56,7 @@ namespace MercadoPago.Demo.WinForms.Forms
             _tabControl.TabPages.Add(CreatePaymentsTab());
             _tabControl.TabPages.Add(CreateQrSalesTab());
             _tabControl.TabPages.Add(CreateStoresTab());
+            _tabControl.TabPages.Add(CreateCashierMovementsTab());
             _tabControl.TabPages.Add(CreateCustomersTab());
             _tabControl.TabPages.Add(CreateAccountTab());
             _tabControl.TabPages.Add(CreateOperationLogTab());
@@ -175,6 +176,13 @@ namespace MercadoPago.Demo.WinForms.Forms
         {
             var tab = new TabPage("🏦 Cuenta / Recursos");
             tab.Controls.Add(new AccountPanel(this) { Dock = DockStyle.Fill });
+            return tab;
+        }
+
+        private TabPage CreateCashierMovementsTab()
+        {
+            var tab = new TabPage("📊 Movimientos Caja");
+            tab.Controls.Add(new CashierMovementsPanel(this) { Dock = DockStyle.Fill });
             return tab;
         }
 

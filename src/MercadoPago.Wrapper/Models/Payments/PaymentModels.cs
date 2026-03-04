@@ -135,6 +135,8 @@ namespace MercadoPago.Wrapper.Models.Payments
     {
         public string ExternalReference { get; set; }
         public string Status { get; set; }
+        public string PosId { get; set; }
+        public string OperationType { get; set; }
         public DateTime? DateCreatedFrom { get; set; }
         public DateTime? DateCreatedTo { get; set; }
         public string Sort { get; set; } = "date_created";
@@ -150,6 +152,10 @@ namespace MercadoPago.Wrapper.Models.Payments
                 parts.Add($"external_reference={Uri.EscapeDataString(ExternalReference)}");
             if (!string.IsNullOrEmpty(Status))
                 parts.Add($"status={Status}");
+            if (!string.IsNullOrEmpty(PosId))
+                parts.Add($"pos_id={PosId}");
+            if (!string.IsNullOrEmpty(OperationType))
+                parts.Add($"operation_type={OperationType}");
             if (DateCreatedFrom.HasValue)
                 parts.Add($"begin_date={DateCreatedFrom:yyyy-MM-ddTHH:mm:ssZ}");
             if (DateCreatedTo.HasValue)

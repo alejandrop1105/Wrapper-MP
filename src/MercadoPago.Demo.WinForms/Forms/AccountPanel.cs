@@ -149,7 +149,14 @@ namespace MercadoPago.Demo.WinForms.Forms
                         JsonConvert.SerializeObject(b, Formatting.Indented));
                     _main.SetStatus($"Balance: ${b.AvailableBalance:N2} disponible");
                 }
-                else ShowResult($"❌ {result.ErrorMessage}\n{result.RawJson}");
+                else
+                {
+                    var msg = result.StatusCode == 403
+                        ? "⚠ El endpoint de Balance requiere permisos de cuenta Marketplace.\n" +
+                          "Este recurso no está disponible para cuentas estándar.\n\n"
+                        : "";
+                    ShowResult($"❌ {msg}{result.ErrorMessage}\n{result.RawJson}");
+                }
             }
             catch (Exception ex) { ShowResult($"Error: {ex.Message}"); }
         }
