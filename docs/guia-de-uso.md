@@ -140,6 +140,11 @@ if (result.IsSuccess)
 | `mp.PointDevices` | `IPointDeviceService` | Terminales Point Smart |
 | `mp.Subscriptions` | `ISubscriptionService` | Suscripciones recurrentes |
 | `mp.Marketplace` | `IMarketplaceService` | Split payments |
+| `mp.Site` | `ISiteService` | Métodos de pago, tipos de doc, cuotas |
+| `mp.MerchantOrders` | `IMerchantOrderService` | Merchant Orders |
+| `mp.Account` | `IAccountService` | Info de cuenta y balance |
+| `mp.Chargebacks` | `IChargebackService` | Contracargos |
+| `mp.Disbursements` | `IDisbursementService` | Desembolsos (advanced payments) |
 
 ---
 
@@ -608,6 +613,96 @@ var preference = await mp.Marketplace.CreatePreferenceAsync(new PreferenceCreate
     },
     MarketplaceFee = 1000m  // comisión del marketplace
 });
+```
+
+---
+
+### 11. Recursos del sitio (Site)
+
+Endpoints de catálogo/referencia que proveen datos dinámicos de MercadoPago.
+
+```csharp
+// Tipos de documento (DNI, CUIT, etc.)
+var idTypes = await mp.Site.GetIdentificationTypesAsync();
+foreach (var t in idTypes.Data)
+    Console.WriteLine($"{t.Id}: {t.Name} ({t.MinLength}-{t.MaxLength} chars)");
+
+// Métodos de pago disponibles
+var methods = await mp.Site.GetPaymentMethodsAsync();
+foreach (var m in methods.Data)
+    Console.WriteLine($"{m.Id}: {m.Name} ({m.PaymentTypeId}) - {m.Status}");
+
+// Cuotas para un monto
+var installments = await mp.Site.GetInstallmentsAsync(amount: 50000m);
+foreach (var info in installments.Data)
+    foreach (var cost in info.PayerCosts)
+        Console.WriteLine($"  {cost.Installments}x ${cost.InstallmentAmount:N2} = ${cost.TotalAmount:N2}");
+
+// Emisores de tarjeta
+var issuers = await mp.Site.GetCardIssuersAsync("visa");
+```
+
+---
+
+### 12. Merchant Orders
+
+Órdenes de comercio que agrupan pagos y shipments.
+
+```csharp
+// Crear
+var order = await mp.MerchantOrders.CreateAsync(new MerchantOrderCreateRequest
+{
+    ExternalReference = "ORDEN-001",
+    Items = new List<MerchantOrderItem>
+    {
+        new MerchantOrderItem { Title = "Producto", Quantity = 1, UnitPrice = 5000m }
+    }
+});
+
+// Obtener
+var detail = await mp.MerchantOrders.GetAsync(orderId);
+
+// Buscar
+var results = await mp.MerchantOrders.SearchAsync(externalReference: "ORDEN-001");
+```
+
+---
+
+### 13. Cuenta y Balance (Account)
+
+```csharp
+// Info del usuario autenticado
+var user = await mp.Account.GetUserInfoAsync();
+Console.WriteLine($"Hola {user.Data.FirstName} ({user.Data.Email})");
+
+// Balance (requiere permisos de marketplace)
+var balance = await mp.Account.GetAccountBalanceAsync();
+Console.WriteLine($"Disponible: ${balance.Data.AvailableBalance:N2}");
+```
+
+---
+
+### 14. Contracargos (Chargebacks)
+
+```csharp
+var chargeback = await mp.Chargebacks.GetAsync("chargeback-id");
+Console.WriteLine($"Monto: {chargeback.Data.Amount} - Estado: {chargeback.Data.Status}");
+```
+
+---
+
+### 15. Desembolsos (Disbursements)
+
+Para pagos avanzados con split (marketplace).
+
+```csharp
+// Obtener reembolsos de un desembolso
+var refunds = await mp.Disbursements.GetRefundsAsync(
+    advancedPaymentId: 123, disbursementId: 456);
+
+// Crear reembolso
+var refund = await mp.Disbursements.RefundAsync(123, 456,
+    new DisbursementRefundRequest { Amount = 1000m });
 ```
 
 ---
