@@ -86,6 +86,9 @@ namespace MercadoPago.Wrapper
         /// <summary>Desembolsos (advanced payments).</summary>
         public IDisbursementService Disbursements { get; }
 
+        /// <summary>Servicio de OAuth (vinculación, renovación de tokens).</summary>
+        public IOAuthService OAuth { get; }
+
         /// <summary>Webhook listener embebido.</summary>
         public WebhookListener WebhookListener { get; private set; }
 
@@ -126,6 +129,12 @@ namespace MercadoPago.Wrapper
             Chargebacks = new ChargebackService(_httpClient);
             Disbursements = new DisbursementService(_httpClient);
 
+            // OAuth
+            var oauthService = new OAuthService(config, _httpClient, _logger);
+            oauthService.OnAccessTokenUpdated = token =>
+                _httpClient.UpdateAccessToken(token);
+            OAuth = oauthService;
+
             _logger.Information(
                 "MpWrapperClient inicializado. Entorno={Environment}, País={Country}",
                 config.Environment, config.Country);
@@ -156,6 +165,7 @@ namespace MercadoPago.Wrapper
         {
             if (!_disposed)
             {
+                (OAuth as IDisposable)?.Dispose();
                 WebhookListener?.Dispose();
                 _httpClient?.Dispose();
                 _disposed = true;

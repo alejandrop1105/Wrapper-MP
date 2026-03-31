@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using MercadoPago.Wrapper.Helpers;
 using MercadoPago.Wrapper.Models.Pos;
 using MercadoPago.Wrapper.Models.QrCode;
 using MercadoPago.Wrapper.Models.Payments;
@@ -401,6 +402,18 @@ namespace MercadoPago.Demo.WinForms.Forms
             var cashier = _cashierList[_cboCashiers.SelectedIndex];
             var externalPosId = cashier.ExternalId ?? cashier.Id.ToString();
             var total = _saleItems.Sum(i => i.Subtotal);
+
+            // Validar referencia externa contra PII
+            if (!ExternalReferenceValidator.Validate(
+                _txtExternalRef.Text.Trim(), Log.Logger))
+            {
+                var proceed = MessageBox.Show(
+                    "⚠ La referencia externa podría contener información sensible (PII).\n" +
+                    "MercadoPago requiere que NO contenga datos personales.\n\n" +
+                    "¿Desea continuar de todos modos?",
+                    "Advertencia PII", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (proceed != DialogResult.Yes) return;
+            }
 
             // Obtener el User ID
             var cfg = _main.ConfigRepo.Get();

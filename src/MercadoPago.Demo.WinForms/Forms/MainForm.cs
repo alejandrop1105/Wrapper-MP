@@ -51,15 +51,16 @@ namespace MercadoPago.Demo.WinForms.Forms
                 Font = new Font("Segoe UI", 9.5f)
             };
 
-            // Crear tabs
+            // Crear tabs (orden pensado para migración al ERP)
             _tabControl.TabPages.Add(CreateConfigTab());
-            _tabControl.TabPages.Add(CreatePaymentsTab());
-            _tabControl.TabPages.Add(CreateQrSalesTab());
             _tabControl.TabPages.Add(CreateStoresTab());
+            _tabControl.TabPages.Add(CreateQrSalesTab());
             _tabControl.TabPages.Add(CreateCashierMovementsTab());
-            _tabControl.TabPages.Add(CreateCustomersTab());
-            _tabControl.TabPages.Add(CreateAccountTab());
+            _tabControl.TabPages.Add(CreatePointSmartTab());
             _tabControl.TabPages.Add(CreateOperationLogTab());
+            _tabControl.TabPages.Add(CreateAccountTab());
+            _tabControl.TabPages.Add(CreatePaymentsTab());
+            _tabControl.TabPages.Add(CreateCustomersTab());
             _tabControl.TabPages.Add(CreateWebhookTab());
 
             Controls.Add(_tabControl);
@@ -82,12 +83,25 @@ namespace MercadoPago.Demo.WinForms.Forms
                     ? MpEnvironment.Production
                     : MpEnvironment.Sandbox;
 
-                var config = new MpWrapperConfig.Builder()
+                var builder = new MpWrapperConfig.Builder()
                     .WithAccessToken(cfg.AccessToken)
                     .WithPublicKey(cfg.PublicKey ?? "")
                     .WithEnvironment(env)
-                    .WithCountry(cfg.Country ?? "AR")
-                    .Build();
+                    .WithCountry(cfg.Country ?? "AR");
+
+                // Homologación
+                if (!string.IsNullOrWhiteSpace(cfg.PlatformId))
+                    builder.WithPlatformId(cfg.PlatformId);
+
+                // OAuth (opcional)
+                if (!string.IsNullOrWhiteSpace(cfg.ClientId))
+                    builder.WithClientId(cfg.ClientId);
+                if (!string.IsNullOrWhiteSpace(cfg.ClientSecret))
+                    builder.WithClientSecret(cfg.ClientSecret);
+                if (!string.IsNullOrWhiteSpace(cfg.RefreshToken))
+                    builder.WithRefreshToken(cfg.RefreshToken);
+
+                var config = builder.Build();
 
                 MpClient = new MpWrapperClient(
                     config,
@@ -155,6 +169,13 @@ namespace MercadoPago.Demo.WinForms.Forms
         {
             var tab = new TabPage("📱 Venta QR Caja");
             tab.Controls.Add(new QrSalesPanel(this) { Dock = DockStyle.Fill });
+            return tab;
+        }
+
+        private TabPage CreatePointSmartTab()
+        {
+            var tab = new TabPage("📟 Point Smart");
+            tab.Controls.Add(new PointSmartPanel(this) { Dock = DockStyle.Fill });
             return tab;
         }
 

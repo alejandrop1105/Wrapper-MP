@@ -136,6 +136,34 @@ namespace MercadoPago.Demo.WinForms.Forms
                     cfg?.WebhookSecret);
 
                 listener.OnNotificationReceived += OnWebhookReceived;
+
+                // Eventos diferenciados de homologación
+                listener.OnOrderCancelled += (s2, args) =>
+                {
+                    if (InvokeRequired)
+                        Invoke(new Action(() => AddTaggedWebhook(args, "🚫 CANCELADA", Color.Red)));
+                    else
+                        AddTaggedWebhook(args, "🚫 CANCELADA", Color.Red);
+                };
+
+                listener.OnActionRequired += (s2, args) =>
+                {
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            AddTaggedWebhook(args, "⚠️ ACCIÓN REQUERIDA", Color.DarkOrange);
+                            MessageBox.Show(
+                                "⚠️ Una orden requiere acción manual del operador.\n\n" +
+                                $"Order ID: {args.Notification?.Data?.Id}\n\n" +
+                                "Registre manualmente la operación según el estado " +
+                                "final en el dispositivo.",
+                                "Acción Requerida",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }));
+                    }
+                };
+
                 listener.Start();
 
                 _btnStart.Enabled = false;
@@ -194,6 +222,19 @@ namespace MercadoPago.Demo.WinForms.Forms
             item.SubItems.Add(e.Notification?.Data?.Id ?? "?");
             item.SubItems.Add(e.IsValid ? "✅" : "❌");
             item.Tag = e.RawJson;
+
+            _listView.Items.Insert(0, item);
+        }
+
+        private void AddTaggedWebhook(WebhookEventArgs e, string tag, Color color)
+        {
+            var item = new ListViewItem(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            item.SubItems.Add(e.Notification?.Type ?? "?");
+            item.SubItems.Add(tag);
+            item.SubItems.Add(e.Notification?.Data?.Id ?? "?");
+            item.SubItems.Add(e.IsValid ? "✅" : "❌");
+            item.Tag = e.RawJson;
+            item.ForeColor = color;
 
             _listView.Items.Insert(0, item);
         }

@@ -57,5 +57,18 @@ namespace MercadoPago.Wrapper.Services
             return await _http.GetAsync<PointPaymentIntentResponse>(
                 $"/point/integration-api/payment-intents/{intentId}", ct);
         }
+
+        /// <summary>
+        /// Cambia el modo de operación de un terminal Point Smart.
+        /// Modos válidos: "PDV" (integrado) o "STANDALONE" (autónomo).
+        /// </summary>
+        public async Task<MpApiResponse<PointDeviceResponse>> ChangeOperatingModeAsync(
+            string deviceId, string operatingMode,
+            CancellationToken ct = default)
+        {
+            return await _http.PatchAsync<PointDeviceResponse>(
+                $"/point/integration-api/devices/{deviceId}",
+                new { operating_mode = operatingMode }, ct);
+        }
     }
 }

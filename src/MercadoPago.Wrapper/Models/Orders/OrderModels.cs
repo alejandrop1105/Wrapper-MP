@@ -18,6 +18,10 @@ namespace MercadoPago.Wrapper.Models.Orders
         [JsonProperty("external_reference")]
         public string ExternalReference { get; set; }
 
+        /// <summary>Identificador de plataforma asignado por MercadoPago al integrador homologado.</summary>
+        [JsonProperty("platform_id")]
+        public string PlatformId { get; set; }
+
         [JsonProperty("description")]
         public string Description { get; set; }
 
@@ -27,11 +31,35 @@ namespace MercadoPago.Wrapper.Models.Orders
         [JsonProperty("expiration_time")]
         public string ExpirationTime { get; set; }
 
+        /// <summary>Configuración adicional de la orden (Point, impresión, etc.).</summary>
+        [JsonProperty("config")]
+        public OrderConfigRequest Config { get; set; }
+
         [JsonProperty("transactions")]
         public OrderTransactionsRequest Transactions { get; set; }
 
         [JsonProperty("payer")]
         public OrderPayerRequest Payer { get; set; }
+    }
+
+    /// <summary>Configuración de la orden.</summary>
+    public class OrderConfigRequest
+    {
+        /// <summary>Configuración específica de Point Smart.</summary>
+        [JsonProperty("point")]
+        public OrderPointConfigRequest Point { get; set; }
+    }
+
+    /// <summary>Configuración específica de Point Smart en la orden.</summary>
+    public class OrderPointConfigRequest
+    {
+        /// <summary>Indica si el ticket debe ser impreso en el dispositivo.</summary>
+        [JsonProperty("print_on_terminal")]
+        public bool? PrintOnTerminal { get; set; }
+
+        /// <summary>Número de identificación que será impreso en el ticket.</summary>
+        [JsonProperty("ticket_number")]
+        public string TicketNumber { get; set; }
     }
 
     public class OrderTransactionsRequest

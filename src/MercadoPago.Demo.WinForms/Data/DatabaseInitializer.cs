@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
@@ -51,7 +52,11 @@ CREATE TABLE IF NOT EXISTS AppConfig (
     WebhookSecret TEXT DEFAULT '',
     WebhookPort INTEGER DEFAULT 5100,
     Country TEXT DEFAULT 'AR',
-    UserId TEXT DEFAULT ''
+    UserId TEXT DEFAULT '',
+    PlatformId TEXT DEFAULT '',
+    ClientId TEXT DEFAULT '',
+    ClientSecret TEXT DEFAULT '',
+    RefreshToken TEXT DEFAULT ''
 );
 
 INSERT OR IGNORE INTO AppConfig (Id) VALUES (1);
@@ -112,6 +117,31 @@ CREATE TABLE IF NOT EXISTS WebhookLog (
             using (var cmd = new SQLiteCommand(sql, conn))
             {
                 cmd.ExecuteNonQuery();
+            }
+
+            // Migración: agregar columnas nuevas a DB existentes
+            MigrateAddColumn(conn, "AppConfig", "PlatformId", "TEXT DEFAULT ''");
+            MigrateAddColumn(conn, "AppConfig", "ClientId", "TEXT DEFAULT ''");
+            MigrateAddColumn(conn, "AppConfig", "ClientSecret", "TEXT DEFAULT ''");
+            MigrateAddColumn(conn, "AppConfig", "RefreshToken", "TEXT DEFAULT ''");
+        }
+
+        private static void MigrateAddColumn(
+            SQLiteConnection conn, string table, string column, string type)
+        {
+            try
+            {
+                using (var cmd = new SQLiteCommand(
+                    $"ALTER TABLE {table} ADD COLUMN {column} {type}", conn))
+                {
+                    cmd.ExecuteNonQuery();
+                    Log.Debug("Migración: columna {Column} agregada a {Table}.",
+                        column, table);
+                }
+            }
+            catch (Exception)
+            {
+                // La columna ya existe, ignorar
             }
         }
     }

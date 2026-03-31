@@ -873,6 +873,10 @@ var mp = new MpWrapperClient(config, logger: myCustomLogger);
 | `WithMaxRetries(int)` | Opcional | `2` | Reintentos en errores transitorios |
 | `WithTimeout(int)` | Opcional | `30` | Timeout HTTP en segundos |
 | `WithUserAgent(string)` | Opcional | `MpWrapperClient/1.0` | User-Agent personalizado |
+| `WithPlatformId(string)` | Opcional | `null` | ID de plataforma (homologación MP) |
+| `WithClientId(string)` | Opcional | `null` | Client ID para OAuth |
+| `WithClientSecret(string)` | Opcional | `null` | Client Secret para OAuth |
+| `WithRefreshToken(string)` | Opcional | `null` | Refresh token para auto-renovación |
 
 ### MpWrapperClient constructor
 
@@ -881,6 +885,171 @@ var mp = new MpWrapperClient(config, logger: myCustomLogger);
 | `config` | **Obligatorio** | — | Configuración del wrapper |
 | `userId` | Opcional | `"me"` | User ID de MP (para Stores) |
 | `logger` | Opcional | `Log.Logger` | Logger de Serilog |
+
+---
+
+## OAuth (Vinculación y Renovación de Tokens)
+
+### Configuración
+
+```csharp
+var config = new MpWrapperConfig.Builder()
+    .WithAccessToken("APP_USR-...")
+    .WithClientId("TU_CLIENT_ID")
+    .WithClientSecret("TU_CLIENT_SECRET")
+    .WithRefreshToken("TU_REFRESH_TOKEN")  // si ya tenés uno
+    .Build();
+
+using (var mp = new MpWrapperClient(config))
+{
+    // Intercambiar código de autorización por token (primera vez)
+    var tokenResponse = await mp.OAuth.ExchangeCodeAsync(
+        authorizationCode: "TMP_CODE_FROM_MP",
+        redirectUri: "https://miapp.com/callback");
+
+    if (tokenResponse.IsSuccess)
+    {
+        // Guardar tokens de forma segura
+        var accessToken = tokenResponse.Data.AccessToken;
+        var refreshToken = tokenResponse.Data.RefreshToken;
+        var expiresIn = tokenResponse.Data.ExpiresIn;
+    }
+
+    // Renovar token manualmente
+    var refreshed = await mp.OAuth.RefreshTokenAsync();
+
+    // Activar renovación automática
+    mp.OAuth.OnTokenRefreshed += (sender, data) =>
+    {
+        // IMPORTANTE: guardar el nuevo refresh_token para la próxima vez
+        GuardarTokenEnBaseDeDatos(data.AccessToken, data.RefreshToken);
+    };
+
+    mp.OAuth.OnTokenRefreshFailed += (sender, ex) =>
+    {
+        Log.Error(ex, "Fallo al renovar token OAuth");
+    };
+
+    mp.OAuth.StartAutoRefresh(
+        refreshToken: "REFRESH_TOKEN_ACTUAL",
+        expiresInSeconds: 21600,      // 6 horas
+        refreshMarginSeconds: 3600);  // renovar 1 hora antes
+}
+```
+
+---
+
+## Helpers
+
+### Formateo de montos por país
+
+```csharp
+using MercadoPago.Wrapper.Helpers;
+
+// Argentina (2 decimales)
+AmountFormatter.Format(1500.50m, "AR");  // "1500.50"
+
+// Chile (sin decimales)
+AmountFormatter.Format(1500.50m, "CL");  // "1500"
+
+// Validar formato
+AmountFormatter.IsValidFormat("1500.50", "AR");  // true
+AmountFormatter.IsValidFormat("1500.50", "CL");  // false (CL no soporta decimales)
+```
+
+### Validación de PII en referencia externa
+
+```csharp
+using MercadoPago.Wrapper.Helpers;
+
+// Seguro
+ExternalReferenceValidator.Validate("VENTA-2024-001", logger);  // true
+
+// Contiene email (PII) — emite warning
+ExternalReferenceValidator.Validate("juan@email.com-001", logger);  // false
+```
+
+---
+
+## Órdenes con Point Smart (API Unificada)
+
+### Crear orden con todos los campos de homologación
+
+```csharp
+var order = await mp.Orders.CreateAsync(
+    new OrderCreateRequest
+    {
+        Type = "online",
+        TotalAmount = AmountFormatter.Format(5000m, config.Country),
+        ExternalReference = "VENTA-001",  // sin PII
+        PlatformId = config.PlatformId,    // asignado por MP
+        ExpirationTime = "2024-12-31T23:59:59.000-03:00",
+        Description = "Venta en mostrador",
+        Config = new OrderConfigRequest
+        {
+            Point = new OrderPointConfigRequest
+            {
+                PrintOnTerminal = true,
+                TicketNumber = "T-001"
+            }
+        },
+        Transactions = new OrderTransactionsRequest
+        {
+            Payments = new List<OrderTransactionPaymentRequest>
+            {
+                new OrderTransactionPaymentRequest
+                {
+                    Amount = AmountFormatter.Format(5000m, config.Country)
+                }
+            }
+        }
+    },
+    idempotencyKey: Guid.NewGuid().ToString("N")  // clave única por intento
+);
+```
+
+### Flujo de pago + reembolso con verificación de consistencia
+
+```csharp
+// 1. Crear orden y esperar pago aprobado vía webhook
+var order = await mp.Orders.CreateAsync(request);
+
+// 2. Al recibir webhook de aprobación, verificar estado
+listener.OnOrderNotification += async (s, args) =>
+{
+    var orderId = args.Notification.Data.Id;
+    var detail = await mp.Orders.GetAsync(orderId);
+
+    if (detail.Data.Status == "processed")
+    {
+        // 3. Reembolsar si es necesario
+        var refund = await mp.Orders.RefundAsync(orderId);
+
+        // 4. Verificar consistencia
+        var updated = await mp.Orders.GetAsync(orderId);
+        Console.WriteLine($"Estado final: {updated.Data.Status}");
+        // Debe ser "refunded" para ser consistente
+    }
+};
+```
+
+### Manejar cancelación y acción requerida
+
+```csharp
+listener.OnOrderCancelled += (s, args) =>
+{
+    var orderId = args.Notification.Data.Id;
+    Console.WriteLine($"Orden {orderId} cancelada desde terminal.");
+    // Actualizar estado en el sistema
+};
+
+listener.OnActionRequired += (s, args) =>
+{
+    var orderId = args.Notification.Data.Id;
+    Console.WriteLine($"⚠️ Orden {orderId}: acción requerida.");
+    // Mostrar alerta al operador para verificar el terminal
+};
+```
 
 ---
 

@@ -17,6 +17,12 @@ namespace MercadoPago.Demo.WinForms.Data.Repositories
         public int WebhookPort { get; set; }
         public string Country { get; set; }
         public string UserId { get; set; }
+
+        // Homologación
+        public string PlatformId { get; set; }
+        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
+        public string RefreshToken { get; set; }
     }
 
     public class OperationLogEntity
@@ -71,7 +77,11 @@ namespace MercadoPago.Demo.WinForms.Data.Repositories
                         WebhookSecret = @WebhookSecret,
                         WebhookPort = @WebhookPort,
                         Country = @Country,
-                        UserId = @UserId
+                        UserId = @UserId,
+                        PlatformId = @PlatformId,
+                        ClientId = @ClientId,
+                        ClientSecret = @ClientSecret,
+                        RefreshToken = @RefreshToken
                     WHERE Id = 1", config);
             }
         }

@@ -52,6 +52,20 @@ namespace MercadoPago.Wrapper.Http
             };
         }
 
+        /// <summary>
+        /// Actualiza el access token en el HttpClient (usado por OAuth auto-refresh).
+        /// </summary>
+        public void UpdateAccessToken(string newAccessToken)
+        {
+            if (string.IsNullOrWhiteSpace(newAccessToken))
+                throw new ArgumentNullException(nameof(newAccessToken));
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", newAccessToken);
+
+            _logger.Information("HttpClient: Access token actualizado dinámicamente.");
+        }
+
         /// <summary>Realiza un GET y deserializa la respuesta.</summary>
         public async Task<MpApiResponse<T>> GetAsync<T>(
             string endpoint,
@@ -89,6 +103,16 @@ namespace MercadoPago.Wrapper.Http
         {
             return await ExecuteWithRetryAsync<T>(
                 HttpMethod.Delete, endpoint, null, ct);
+        }
+
+        /// <summary>Realiza un PATCH con body JSON.</summary>
+        public async Task<MpApiResponse<T>> PatchAsync<T>(
+            string endpoint,
+            object body,
+            CancellationToken ct = default)
+        {
+            return await ExecuteWithRetryAsync<T>(
+                new HttpMethod("PATCH"), endpoint, body, ct);
         }
 
         /// <summary>Realiza un DELETE sin esperar body de respuesta.</summary>

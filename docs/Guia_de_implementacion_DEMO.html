@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía de Implementación y Prueba para DEMO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #1a1a2e;
+    line-height: 1.7;
+    padding: 50px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+    font-size: 14px;
+    background: #fff;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #3b82f6;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e40af;
+    margin-top: 36px;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #dbeafe;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e3a5f;
+    margin-top: 24px;
+    margin-bottom: 10px;
+  }
+
+  p { margin-bottom: 12px; }
+
+  a { color: #2563eb; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 600; }
+
+  ol, ul {
+    margin-bottom: 12px;
+    padding-left: 24px;
+  }
+
+  li { margin-bottom: 6px; }
+
+  hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 28px 0;
+  }
+
+  code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: #be185d;
+  }
+
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  blockquote {
+    border-left: 4px solid #3b82f6;
+    background: #eff6ff;
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+  }
+
+  blockquote.warning {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+  }
+
+  blockquote.tip {
+    border-left-color: #10b981;
+    background: #ecfdf5;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+
+  th {
+    background: #1e40af;
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .checkbox {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #94a3b8;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .result-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 10px 0;
+    font-size: 13.5px;
+  }
+
+  .result-box strong { color: #166534; }
+
+  .validation-list {
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 10px 0;
+  }
+
+  .toc {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin-bottom: 28px;
+  }
+
+  .toc ol { margin: 0; }
+  .toc li { margin-bottom: 4px; }
+
+  @media print {
+    body { padding: 30px 40px; }
+    pre { break-inside: avoid; }
+    h2 { break-after: avoid; }
+    h3 { break-after: avoid; }
+    .page-break { break-before: page; }
+  }
+</style>
+</head>
+<body>
+
+<h1>📘 Guía de Implementación y Prueba para DEMO</h1>
+
+<div class="toc">
+<h2 style="border:none; margin-top:0; color:#0f172a;">Índice</h2>
+<ol>
+  <li><a href="#s1">Preparación de la Cuenta en MercadoPago</a></li>
+  <li><a href="#s2">Generación de Tokens y Credenciales</a></li>
+  <li><a href="#s3">Configuración en la Plataforma de MP</a></li>
+  <li><a href="#s4">Configuración del Demo WinForms</a></li>
+  <li><a href="#s5">Prueba por Tabs (Paso a Paso)</a></li>
+  <li><a href="#s6">Troubleshooting Común</a></li>
+  <li><a href="#s7">Checklist Final de Homologación</a></li>
+</ol>
+</div>
+
+<hr>
+
+<h2 id="s1">1. Preparación de la Cuenta en MercadoPago</h2>
+
+<h3>1.1 Crear cuenta de Developers</h3>
+<ol>
+  <li>Ir a <a href="https://www.mercadopago.com.ar/developers/panel">https://www.mercadopago.com.ar/developers/panel</a></li>
+  <li>Iniciar sesión con tu cuenta de MercadoPago (la misma que usás para cobrar)</li>
+  <li>Si es la primera vez, aceptar términos y condiciones del programa de desarrolladores</li>
+</ol>
+
+<h3>1.2 Crear una Aplicación</h3>
+<ol>
+  <li>En el panel de Developers, hacer clic en <strong>"Crear aplicación"</strong></li>
+  <li>Completar:
+    <ul>
+      <li><strong>Nombre</strong>: <code>Demo ERP Integración</code> (o el nombre de tu sistema)</li>
+      <li><strong>Modelo de integración</strong>: Seleccionar <strong>"Checkout Pro"</strong> o <strong>"Pagos en persona"</strong> según corresponda</li>
+      <li><strong>Tipo de producto</strong>: <strong>Punto de venta presencial (QR o Point)</strong></li>
+    </ul>
+  </li>
+  <li>Guardar. Se generará automáticamente un <strong>App ID</strong></li>
+</ol>
+
+<h3>1.3 Crear Cuentas de Prueba (Test Users)</h3>
+<blockquote class="warning">
+  ⚠️ <strong>IMPORTANTE</strong>: Para probar en sandbox necesitás al menos 2 cuentas de prueba: una vendedora y una compradora.
+</blockquote>
+<ol>
+  <li>Ir a <strong>"Cuentas de prueba"</strong> en el menú lateral del panel de Developers</li>
+  <li>Crear <strong>cuenta vendedora</strong> (esta será la que reciba pagos)</li>
+  <li>Crear <strong>cuenta compradora</strong> (esta será la que pague)</li>
+  <li>Anotar las credenciales de ambas cuentas</li>
+</ol>
+
+<hr>
+
+<h2 id="s2">2. Generación de Tokens y Credenciales</h2>
+
+<h3>2.1 Access Token (Obligatorio)</h3>
+<ol>
+  <li>En el panel de tu aplicación, ir a <strong>"Credenciales"</strong></li>
+  <li>Seleccionar la pestaña <strong>"Credenciales de prueba"</strong> (sandbox) o <strong>"Credenciales de producción"</strong></li>
+  <li>Copiar el <strong>Access Token</strong> — tiene formato: <code>APP_USR-XXXX-XXXXXXXXX-XXXXXXXXXXXXXXXXXXXX-XXXXXXXXX</code></li>
+  <li>Copiar la <strong>Public Key</strong> — tiene formato: <code>APP_USR-XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</code></li>
+</ol>
+<blockquote class="tip">
+  📝 Para sandbox, usá las credenciales de la <strong>cuenta vendedora de prueba</strong>, no las de tu cuenta real.
+</blockquote>
+
+<h3>2.2 User ID (Obligatorio para QR y Sucursales)</h3>
+<ol>
+  <li>Con el Access Token, consultar tu User ID:
+    <ul>
+      <li>Podés obtenerlo desde el Demo: Tab <strong>"Cuenta / Recursos"</strong> → botón <strong>"👤 Mi Cuenta"</strong></li>
+      <li>O via API: <code>GET https://api.mercadopago.com/users/me</code></li>
+    </ul>
+  </li>
+  <li>Anotar el campo <code>id</code> de la respuesta</li>
+</ol>
+
+<h3>2.3 Platform ID (Homologación)</h3>
+<p>El <code>platform_id</code> es un identificador asignado por MercadoPago a tu integración. Se obtiene de dos formas:</p>
+<ul>
+  <li><strong>Integración estándar</strong>: Usá el valor genérico correspondiente a tu país:
+    <ul><li>Argentina: no hay valor genérico estándar; solicitarlo a MP</li></ul>
+  </li>
+  <li><strong>Integración personalizada</strong>: Contactar a tu asesor de MercadoPago para que te asigne un <code>platform_id</code> específico para tu sistema ERP</li>
+</ul>
+<blockquote class="tip">
+  💡 Si todavía no tenés el <code>platform_id</code>, dejá el campo vacío en la configuración. El sistema funcionará igualmente, pero necesitarás completarlo antes de la homologación final.
+</blockquote>
+
+<h3>2.4 Credenciales OAuth (Opcional para Homologación)</h3>
+<p>Si necesitás OAuth (para integraciones marketplace o para auto-refresh de tokens):</p>
+<ol>
+  <li>En tu aplicación de MP Developers, ir a <strong>"Credenciales"</strong></li>
+  <li>Copiar:
+    <ul>
+      <li><strong>Client ID</strong>: <code>APP_USR-XXXX</code> (es el app ID)</li>
+      <li><strong>Client Secret</strong>: Se muestra debajo del Client ID</li>
+    </ul>
+  </li>
+  <li>Para obtener un <strong>Refresh Token</strong>:
+    <ul>
+      <li>Ejecutar el flujo de autorización OAuth: <code>https://auth.mercadopago.com.ar/authorization?client_id={CLIENT_ID}&response_type=code&platform_id=mp&redirect_uri={TU_REDIRECT_URI}</code></li>
+      <li>Intercambiar el <code>code</code> recibido por un access_token + refresh_token</li>
+    </ul>
+  </li>
+</ol>
+<blockquote class="tip">
+  💡 Para pruebas básicas (sandbox), no necesitás OAuth. El Access Token directo es suficiente.
+</blockquote>
+
+<h3>2.5 Webhook Secret (Para Validación de Notificaciones)</h3>
+<ol>
+  <li>En tu aplicación de MP Developers, ir a <strong>"Webhooks"</strong> o <strong>"Notificaciones IPN"</strong></li>
+  <li>Configurar la URL de notificación (necesitás un endpoint público, ver sección 3.2)</li>
+  <li>Copiar el <strong>Secret</strong> que genera MercadoPago para validar las firmas HMAC</li>
+</ol>
+
+<hr>
+
+<h2 id="s3">3. Configuración en la Plataforma de MP</h2>
+
+<h3>3.1 Sucursales y Cajas (Para QR)</h3>
+<p>Para que funcione el flujo de venta por QR, necesitás crear al menos:</p>
+<ol>
+  <li><strong>Una Sucursal</strong> en MercadoPago:
+    <ul>
+      <li>Podés crearla desde el Demo (Tab "Sucursales / Cajas") o desde el panel de MP</li>
+      <li>Datos requeridos: nombre, dirección (calle, número, ciudad, provincia, lat/long)</li>
+    </ul>
+    <blockquote class="warning">
+      ⚠️ <strong>CUIDADO con las ciudades</strong>: MercadoPago valida la ciudad contra su catálogo interior. Usá nombres oficiales. Ejemplo:<br>
+      ✅ <code>La Plata</code> (con state_name <code>Buenos Aires</code>)<br>
+      ❌ <code>Buenos Aires</code> como city_name (causa error de validación)
+    </blockquote>
+  </li>
+  <li><strong>Al menos una Caja/POS</strong> vinculada a la sucursal:
+    <ul>
+      <li>Se crea automáticamente con un código QR asignado</li>
+      <li>Anotá el <code>external_id</code> de la caja (lo necesitás para enviar órdenes)</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>3.2 Webhooks (Para Notificaciones)</h3>
+<p>Para recibir notificaciones en tu red local necesitás exponer el puerto:</p>
+<p><strong>Opción A — Cloudflare Tunnel (recomendado):</strong></p>
+<pre><code>cloudflared tunnel --url http://localhost:5100</code></pre>
+<p><strong>Opción B — ngrok:</strong></p>
+<pre><code>ngrok http 5100</code></pre>
+<p>Luego configurar la URL pública generada en el panel de MP → Webhooks:</p>
+<ul>
+  <li>URL: <code>https://tu-tunnel-url/webhooks/mp/</code></li>
+  <li>Eventos: <code>payment</code>, <code>merchant_order</code>, <code>point_integration_wh</code></li>
+</ul>
+
+<h3>3.3 Terminales Point Smart (Para Orders Unificadas)</h3>
+<p>Si tenés un dispositivo Point Smart (dispositivo físico):</p>
+<ol>
+  <li>Vincular el dispositivo a tu cuenta de MercadoPago desde la app de MP o el panel</li>
+  <li>El dispositivo aparecerá automáticamente al listar terminales desde el Demo</li>
+  <li>Asegurate que esté en modo <strong>PDV</strong> para recibir órdenes desde el ERP</li>
+</ol>
+<blockquote class="tip">
+  💡 Si NO tenés dispositivo físico, el tab "Point Smart" te permite probar la creación de órdenes igualmente. Obtendrás errores de dispositivo, pero podrás verificar que la API funciona.
+</blockquote>
+
+<hr>
+
+<h2 id="s4">4. Configuración del Demo WinForms</h2>
+
+<h3>4.1 Iniciar el Demo</h3>
+<pre><code>cd d:\DESARROLLO\ANTIGRAVITY\MP Wrapper
+dotnet run --project src/MercadoPago.Demo.WinForms/MercadoPago.Demo.WinForms.csproj</code></pre>
+
+<h3>4.2 Tab ⚙ Configuración — Completar Campos</h3>
+<table>
+  <thead>
+    <tr><th>Campo</th><th>Valor</th><th style="text-align:center">Obligatorio</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Access Token</strong></td><td><code>APP_USR-xxxx...</code> (de tu cuenta vendedora de prueba)</td><td style="text-align:center">✅</td></tr>
+    <tr><td><strong>Public Key</strong></td><td><code>APP_USR-xxxx...</code></td><td style="text-align:center">Opcional</td></tr>
+    <tr><td><strong>User ID</strong></td><td>Tu ID numérico de MP (ej: <code>123456789</code>)</td><td style="text-align:center">✅ para QR</td></tr>
+    <tr><td><strong>Entorno</strong></td><td><code>sandbox</code> para pruebas, <code>production</code> para real</td><td style="text-align:center">✅</td></tr>
+    <tr><td><strong>País</strong></td><td><code>AR</code> (o el que corresponda)</td><td style="text-align:center">✅</td></tr>
+    <tr><td><strong>Puerto</strong></td><td><code>5100</code> (o el que prefieras para webhooks)</td><td style="text-align:center">✅</td></tr>
+    <tr><td><strong>Secreto</strong></td><td>El secret del webhook desde MP Developers</td><td style="text-align:center">Recomendado</td></tr>
+    <tr><td><strong>Platform ID</strong></td><td>El ID de plataforma asignado por MP</td><td style="text-align:center">Para homologación</td></tr>
+    <tr><td><strong>Client ID</strong></td><td>Solo si usás OAuth</td><td style="text-align:center">Opcional</td></tr>
+    <tr><td><strong>Client Secret</strong></td><td>Solo si usás OAuth</td><td style="text-align:center">Opcional</td></tr>
+    <tr><td><strong>Refresh Token</strong></td><td>Solo si usás OAuth</td><td style="text-align:center">Opcional</td></tr>
+  </tbody>
+</table>
+<ol>
+  <li>Completar los campos</li>
+  <li>Hacer clic en <strong>"💾 Guardar"</strong></li>
+  <li>Hacer clic en <strong>"🔌 Test Conexión"</strong> para verificar que todo esté correcto</li>
+  <li>Si la conexión es exitosa, verás los datos de tu cuenta de MP en el resultado</li>
+</ol>
+
+<hr>
+
+<h2 id="s5">5. Prueba por Tabs (Paso a Paso)</h2>
+
+<h3>Tab 1: ⚙ Configuración</h3>
+<p><strong>Qué probar:</strong></p>
+<ul>
+  <li><span class="checkbox"></span> Guardar credenciales → mensaje "Configuración guardada"</li>
+  <li><span class="checkbox"></span> Test de conexión → muestra datos de la cuenta (User ID, nombre, email)</li>
+  <li><span class="checkbox"></span> Verificar que la barra inferior diga "🟢 Conectado (Sandbox)"</li>
+</ul>
+<div class="result-box"><strong>Resultado esperado:</strong> Conexión exitosa y datos del usuario visibles.</div>
+
+<hr>
+
+<h3>Tab 2: 🏪 Sucursales / Cajas</h3>
+<p><strong>Qué probar (en este orden):</strong></p>
+<ol>
+  <li><span class="checkbox"></span> <strong>Sincronizar Sucursales</strong> → carga las sucursales existentes en MP</li>
+  <li><span class="checkbox"></span> <strong>Crear Sucursal</strong> (si no existe):
+    <ul>
+      <li>Nombre: <code>Sucursal Demo</code></li>
+      <li>Dirección: calle, número, ciudad, estado, lat/long</li>
+      <li>⚠️ La ciudad debe coincidir con el catálogo de MP (ej: <code>CABA</code> para Capital Federal)</li>
+    </ul>
+  </li>
+  <li><span class="checkbox"></span> <strong>Crear Caja</strong> vinculada a la sucursal:
+    <ul>
+      <li>Nombre: <code>Caja 1</code></li>
+      <li>External ID: <code>CAJA-DEMO-001</code></li>
+    </ul>
+  </li>
+  <li><span class="checkbox"></span> Verificar que la caja aparece en la lista con su QR asignado</li>
+</ol>
+<div class="result-box"><strong>Resultado esperado:</strong> Sucursal y Caja creadas en MP, QR generado.</div>
+<p><strong>Datos que obtenés para el siguiente tab:</strong></p>
+<ul>
+  <li><code>User ID</code> (ya lo tenías)</li>
+  <li><code>External POS ID</code> de la caja creada (ej: <code>CAJA-DEMO-001</code>)</li>
+</ul>
+
+<hr>
+
+<h3>Tab 3: 📱 Venta QR Caja</h3>
+<p><strong>Qué probar:</strong></p>
+<ol>
+  <li><span class="checkbox"></span> Seleccionar sucursal y caja del combo</li>
+  <li><span class="checkbox"></span> Agregar items a la venta (producto, cantidad, precio)</li>
+  <li><span class="checkbox"></span> Verificar que la referencia externa genera automáticamente un valor sin PII</li>
+  <li><span class="checkbox"></span> <strong>Enviar Orden a Caja</strong> → la orden queda publicada en el QR de esa caja</li>
+  <li><span class="checkbox"></span> Desde la <strong>cuenta compradora de prueba</strong> (en el celular con la app de MP):
+    <ul>
+      <li>Escanear el QR de la caja</li>
+      <li>Ver el detalle de la orden</li>
+      <li>Pagar</li>
+    </ul>
+  </li>
+  <li><span class="checkbox"></span> Verificar que llega el webhook de pago aprobado (Tab Webhooks)</li>
+  <li><span class="checkbox"></span> <strong>Consultar Pago</strong> por referencia externa o Payment ID</li>
+  <li><span class="checkbox"></span> <strong>Eliminar Orden</strong> de la caja (limpiar)</li>
+</ol>
+<div class="result-box"><strong>Resultado esperado:</strong> Flujo completo de venta QR: crear → pagar → notificación webhook.</div>
+<div class="validation-list">
+  <strong>Validaciones de homologación demostradas:</strong>
+  <ul>
+    <li>✅ <code>ExternalReferenceValidator</code> activo (advierte si detecta PII)</li>
+    <li>✅ Formato de monto correcto según país</li>
+  </ul>
+</div>
+
+<hr>
+
+<h3>Tab 4: 📊 Movimientos Caja</h3>
+<p><strong>Qué probar:</strong></p>
+<ol>
+  <li><span class="checkbox"></span> Consultar movimientos de la caja después de una venta</li>
+  <li><span class="checkbox"></span> Verificar que el pago realizado en el tab anterior aparece</li>
+</ol>
+<div class="result-box"><strong>Resultado esperado:</strong> Historial de transacciones de la caja visible.</div>
+
+<hr>
+
+<h3>Tab 5: 📟 Point Smart</h3>
+<blockquote class="tip">
+  💡 Este tab requiere un dispositivo Point Smart físico vinculado a tu cuenta. Si no tenés uno, podés probar la creación de la orden (obtendrás error de dispositivo, pero verificás la estructura del request).
+</blockquote>
+<p><strong>Qué probar:</strong></p>
+<ol>
+  <li><span class="checkbox"></span> <strong>🔄 Cargar</strong> terminales → lista los dispositivos</li>
+  <li><span class="checkbox"></span> Seleccionar una terminal</li>
+  <li><span class="checkbox"></span> <strong>Cambiar modo</strong> a PDV (si estaba en STANDALONE)</li>
+  <li><span class="checkbox"></span> Completar datos de la orden:
+    <ul>
+      <li>Monto, descripción, referencia externa, nro. ticket</li>
+      <li>Verificar ✅ "Imprimir ticket en terminal"</li>
+    </ul>
+  </li>
+  <li><span class="checkbox"></span> <strong>📤 Crear Orden</strong> → envía la orden a la terminal
+    <ul>
+      <li>Verificar que el resultado muestra:
+        <ul>
+          <li>✅ Order ID</li>
+          <li>✅ <code>platform_id</code> (si lo configuraste)</li>
+          <li>✅ <code>config.point.print_on_terminal</code> y <code>ticket_number</code></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><span class="checkbox"></span> <strong>🔍 Consultar</strong> → ver el estado actual de la orden</li>
+  <li><span class="checkbox"></span> Si hay terminal: el cliente paga en el dispositivo → webhook de aprobación</li>
+  <li><span class="checkbox"></span> <strong>🚫 Cancelar</strong> → cancelar una orden activa</li>
+  <li><span class="checkbox"></span> <strong>↩ Reembolsar</strong> → reembolsar una orden pagada</li>
+</ol>
+<div class="result-box"><strong>Resultado esperado:</strong> Flujo completo de Orders Unificadas con toda la metadata de homologación.</div>
+<div class="validation-list">
+  <strong>Validaciones de homologación demostradas:</strong>
+  <ul>
+    <li>✅ <code>platform_id</code> incluido en el request</li>
+    <li>✅ <code>config.point.print_on_terminal</code> + <code>ticket_number</code></li>
+    <li>✅ <code>AmountFormatter</code> (monto formateado por país)</li>
+    <li>✅ <code>ExternalReferenceValidator</code> (validación PII)</li>
+  </ul>
+</div>
+
+<hr>
+
+<h3>Tab 6: 📋 Log Operaciones</h3>
+<p><strong>Qué probar:</strong></p>
+<ol>
+  <li><span class="checkbox"></span> Verificar que aparecen todas las operaciones realizadas</li>
+  <li><span class="checkbox"></span> Cada entrada tiene: tipo, ID externo, monto, request/response JSON</li>
+</ol>
+<div class="result-box"><strong>Resultado esperado:</strong> Historial completo de operaciones con request/response para auditoría.</div>
+
+<hr>
+
+<h3>Tab 7: 🏦 Cuenta / Recursos</h3>
+<p><strong>Qué probar:</strong></p>
+<ol>
+  <li><span class="checkbox"></span> <strong>👤 Mi Cuenta</strong> → info del usuario autenticado</li>
+  <li><span class="checkbox"></span> <strong>💰 Balance</strong> → balance disponible (puede dar 403 si no es marketplace)</li>
+  <li><span class="checkbox"></span> <strong>💳 Métodos Pago</strong> → carga grilla con todos los métodos del país</li>
+  <li><span class="checkbox"></span> <strong>🪪 Tipos Doc.</strong> → carga tipos de documento (DNI, CUIL, CUIT, etc.)</li>
+  <li><span class="checkbox"></span> <strong>📊 Cuotas</strong> → ingresá un monto y verificá las opciones de cuotas</li>
+</ol>
+<div class="result-box"><strong>Resultado esperado:</strong> Datos de catálogo cargados correctamente.</div>
+
+<hr>
+
+<h3>Tab 8: 💳 Pagos (Checkout Pro)</h3>
+<p><strong>Qué probar:</strong></p>
+<ol>
+  <li><span class="checkbox"></span> Completar monto, descripción, referencia externa, email</li>
+  <li><span class="checkbox"></span> Verificar que <code>ExternalReferenceValidator</code> advierte si usás datos personales</li>
+  <li><span class="checkbox"></span> <strong>🌐 Checkout Pro</strong> → crea la preferencia y ofrece abrir en navegador</li>
+  <li><span class="checkbox"></span> Pagar desde el navegador con la cuenta compradora de prueba</li>
+  <li><span class="checkbox"></span> <strong>🔍 Buscar Pago</strong> por ID o por referencia externa</li>
+  <li><span class="checkbox"></span> <strong>↩ Reembolsar</strong> un pago aprobado</li>
+</ol>
+<div class="result-box"><strong>Resultado esperado:</strong> Crear preferencia → pagar → buscar → reembolsar.</div>
+
+<hr>
+
+<h3>Tab 9: 👤 Clientes</h3>
+<p><strong>Qué probar:</strong></p>
+<ol>
+  <li><span class="checkbox"></span> <strong>Crear</strong> cliente con email, nombre, teléfono, documento</li>
+  <li><span class="checkbox"></span> <strong>Buscar</strong> por email</li>
+  <li><span class="checkbox"></span> <strong>Consultar</strong> por ID</li>
+  <li><span class="checkbox"></span> <strong>Editar</strong> datos del cliente</li>
+  <li><span class="checkbox"></span> <strong>Eliminar</strong> el cliente de prueba</li>
+</ol>
+<div class="result-box"><strong>Resultado esperado:</strong> CRUD completo de clientes operativo.</div>
+
+<hr>
+
+<h3>Tab 10: 🔔 Webhooks</h3>
+<p><strong>Qué probar (requiere endpoint público o tunnel configurado):</strong></p>
+<ol>
+  <li><span class="checkbox"></span> <strong>▶ Iniciar</strong> listener → debe decir "🟢 Escuchando en puerto XXXX"</li>
+  <li><span class="checkbox"></span> Generar una operación (ej: venta QR o Checkout Pro) para provocar un webhook</li>
+  <li><span class="checkbox"></span> Verificar que el webhook aparece en la lista con:
+    <ul>
+      <li>Tipo de evento</li>
+      <li>Acción</li>
+      <li>Resource ID</li>
+      <li>Indicador de validación ✅/❌</li>
+    </ul>
+  </li>
+  <li><span class="checkbox"></span> Si llega una cancelación: verificar badge 🚫 en la lista</li>
+  <li><span class="checkbox"></span> Si llega un <code>action_required</code>: verificar alerta ⚠️ con MessageBox</li>
+  <li><span class="checkbox"></span> Seleccionar un webhook → ver el JSON completo en el panel inferior</li>
+  <li><span class="checkbox"></span> <strong>⏹ Detener</strong> listener</li>
+</ol>
+<p><strong>Requisitos previos:</strong></p>
+<ul>
+  <li>Puerto registrado si no es admin: <code>netsh http add urlacl url=http://+:5100/webhooks/mp/ user=EVERYONE</code></li>
+  <li>Tunnel (ngrok o Cloudflare) si probás desde red local</li>
+  <li>Secret configurado en Tab Configuración</li>
+</ul>
+
+<hr>
+
+<h2 id="s6">6. Troubleshooting Común</h2>
+
+<h3>Error "Acceso denegado" al iniciar Webhook Listener</h3>
+<p><strong>Causa:</strong> HttpListener requiere permisos en Windows.</p>
+<p><strong>Solución:</strong> Ejecutar en terminal como administrador:</p>
+<pre><code>netsh http add urlacl url=http://+:5100/webhooks/mp/ user=EVERYONE</code></pre>
+
+<h3>Error 405 al listar Sucursales</h3>
+<p><strong>Causa:</strong> La API de MP requiere el sufijo <code>/search</code>.</p>
+<p><strong>Solución:</strong> Ya está manejado en el Wrapper. Si ocurre, verificar que el <code>User ID</code> esté configurado.</p>
+
+<h3>Error de validación de ciudad al crear Sucursal</h3>
+<p><strong>Causa:</strong> MercadoPago valida la ciudad contra su catálogo interno.</p>
+<p><strong>Solución:</strong> Usar nombres del catálogo oficial. Ejemplo para Buenos Aires:</p>
+<ul>
+  <li>state_name: <code>Buenos Aires</code></li>
+  <li>city_name: <code>La Plata</code>, <code>Quilmes</code>, <code>Mar del Plata</code>, etc. (NO <code>Buenos Aires</code>)</li>
+  <li>Para CABA: state_name = <code>Capital Federal</code>, city_name = <code>CABA</code></li>
+</ul>
+
+<h3>Error "Build: file in use"</h3>
+<p><strong>Causa:</strong> El Demo está corriendo.</p>
+<p><strong>Solución:</strong> Cerrar el Demo antes de recompilar, o:</p>
+<pre><code>Stop-Process -Name "MercadoPago.Demo.WinForms" -ErrorAction SilentlyContinue</code></pre>
+
+<h3>Webhook no llega</h3>
+<p><strong>Causa posible:</strong> Tunnel no está activo, o URL no configurada en MP.</p>
+<p><strong>Solución:</strong></p>
+<ol>
+  <li>Verificar que ngrok/cloudflared está corriendo</li>
+  <li>Verificar la URL configurada en MP Developers → Webhooks</li>
+  <li>Verificar que el listener dice "🟢 Escuchando"</li>
+</ol>
+
+<h3>"La referencia externa podría contener PII"</h3>
+<p><strong>Causa:</strong> <code>ExternalReferenceValidator</code> detectó posible información personal.</p>
+<p><strong>Solución:</strong> Usar referencias genéricas sin datos personales:</p>
+<ul>
+  <li>✅ <code>VENTA-2024-001</code>, <code>ORD-ABC123</code>, <code>PS-20240325140000</code></li>
+  <li>❌ <code>Juan-Perez-DNI12345678</code>, <code>cliente@email.com-001</code></li>
+</ul>
+
+<hr>
+
+<h2 id="s7">7. Checklist Final de Homologación</h2>
+<p>Antes de la entrevista de homologación, verificar que podés demostrar:</p>
+
+<h3>Mandatorios (Críticos)</h3>
+<ul>
+  <li><span class="checkbox"></span> <code>platform_id</code> configurado y enviado en las órdenes</li>
+  <li><span class="checkbox"></span> <code>config.point.print_on_terminal</code> y <code>ticket_number</code> presentes en Orders</li>
+  <li><span class="checkbox"></span> Cambio de modo de operación (PDV ↔ STANDALONE) funciona</li>
+  <li><span class="checkbox"></span> Manejo de <code>OnOrderCancelled</code> y <code>OnActionRequired</code> en webhooks</li>
+  <li><span class="checkbox"></span> Validación PII en <code>external_reference</code> (ExternalReferenceValidator)</li>
+  <li><span class="checkbox"></span> Formateo de montos por país (AmountFormatter)</li>
+</ul>
+
+<h3>Flujos Completos a Demostrar</h3>
+<ul>
+  <li><span class="checkbox"></span> <strong>Venta QR</strong>: crear orden → cliente paga → webhook recibido → consulta pago</li>
+  <li><span class="checkbox"></span> <strong>Point Smart</strong>: crear orden → pago en terminal → webhook → cancelación → reembolso</li>
+  <li><span class="checkbox"></span> <strong>Checkout Pro</strong>: crear preferencia → pagar online → buscar → reembolsar</li>
+</ul>
+
+<h3>OAuth (Si aplica)</h3>
+<ul>
+  <li><span class="checkbox"></span> Token refresh funciona</li>
+  <li><span class="checkbox"></span> Auto-refresh configurado</li>
+</ul>
+
+<h3>Documentación</h3>
+<ul>
+  <li><span class="checkbox"></span> Tener a mano este documento y la guía de uso durante la entrevista</li>
+</ul>
+
+</body>
+</html>

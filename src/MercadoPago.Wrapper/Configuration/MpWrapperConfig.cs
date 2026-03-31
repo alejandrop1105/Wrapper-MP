@@ -41,6 +41,23 @@ namespace MercadoPago.Wrapper.Configuration
         /// <summary>User-Agent personalizado para las solicitudes.</summary>
         public string UserAgent { get; private set; } = "MpWrapperClient/1.0";
 
+        /// <summary>
+        /// Identificador de plataforma asignado por MercadoPago al integrador homologado.
+        /// Se envía automáticamente en la creación de órdenes.
+        /// </summary>
+        public string PlatformId { get; private set; }
+
+        // ─── OAuth (opcional, para flujo OAuth marketplace) ───
+
+        /// <summary>Client ID de la aplicación de MercadoPago (para flujo OAuth).</summary>
+        public string ClientId { get; private set; }
+
+        /// <summary>Client Secret de la aplicación de MercadoPago (para flujo OAuth).</summary>
+        public string ClientSecret { get; private set; }
+
+        /// <summary>Refresh token para renovación automática del access token.</summary>
+        public string RefreshToken { get; private set; }
+
         private MpWrapperConfig() { }
 
         /// <summary>
@@ -103,6 +120,34 @@ namespace MercadoPago.Wrapper.Configuration
             public Builder WithUserAgent(string userAgent)
             {
                 _config.UserAgent = userAgent;
+                return this;
+            }
+
+            /// <summary>Configura el platform_id asignado por MercadoPago (se obtiene al homologar).</summary>
+            public Builder WithPlatformId(string platformId)
+            {
+                _config.PlatformId = platformId;
+                return this;
+            }
+
+            /// <summary>Configura el Client ID para flujo OAuth.</summary>
+            public Builder WithClientId(string clientId)
+            {
+                _config.ClientId = clientId;
+                return this;
+            }
+
+            /// <summary>Configura el Client Secret para flujo OAuth.</summary>
+            public Builder WithClientSecret(string clientSecret)
+            {
+                _config.ClientSecret = clientSecret;
+                return this;
+            }
+
+            /// <summary>Configura el refresh token para renovación automática.</summary>
+            public Builder WithRefreshToken(string refreshToken)
+            {
+                _config.RefreshToken = refreshToken;
                 return this;
             }
 

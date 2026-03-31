@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using MercadoPago.Demo.WinForms.Data.Repositories;
+using MercadoPago.Wrapper.Helpers;
 using MercadoPago.Wrapper.Models.Payments;
 using MercadoPago.Wrapper.Models.Preferences;
 using Newtonsoft.Json;
@@ -133,6 +134,18 @@ namespace MercadoPago.Demo.WinForms.Forms
 
             try
             {
+                // Validar referencia externa contra PII
+                if (!ExternalReferenceValidator.Validate(
+                    _txtExternalRef.Text.Trim(), Log.Logger))
+                {
+                    var proceed = MessageBox.Show(
+                        "⚠ La referencia externa podría contener información sensible (PII).\n" +
+                        "MercadoPago requiere que NO contenga datos personales.\n\n" +
+                        "¿Desea continuar de todos modos?",
+                        "Advertencia PII", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (proceed != DialogResult.Yes) return;
+                }
+
                 _main.SetStatus("Creando preferencia de Checkout Pro...");
                 decimal amount;
                 if (!decimal.TryParse(_txtAmount.Text, out amount))

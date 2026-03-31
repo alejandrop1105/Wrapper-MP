@@ -36,6 +36,15 @@ namespace MercadoPago.Wrapper.Webhooks
         /// <summary>Se dispara específicamente ante notificaciones de orden.</summary>
         public event EventHandler<WebhookEventArgs> OnOrderNotification;
 
+        /// <summary>Se dispara cuando una orden es cancelada desde la terminal.</summary>
+        public event EventHandler<WebhookEventArgs> OnOrderCancelled;
+
+        /// <summary>
+        /// Se dispara cuando una orden requiere acción manual del operador.
+        /// El operador debe registrar manualmente la operación según el estado final en el dispositivo.
+        /// </summary>
+        public event EventHandler<WebhookEventArgs> OnActionRequired;
+
         /// <summary>Indica si el listener está activo.</summary>
         public bool IsRunning { get; private set; }
 
@@ -167,7 +176,30 @@ namespace MercadoPago.Wrapper.Webhooks
                     OnPaymentNotification?.Invoke(this, args);
                 else if (notification?.Type == "merchant_order"
                     || notification?.Type == "orders")
+                {
                     OnOrderNotification?.Invoke(this, args);
+
+                    // Detectar cancelación de orden en la terminal
+                    if (notification?.Action == "order.cancelled"
+                        || notification?.Action == "cancelled")
+                    {
+                        _logger.Warning(
+                            "Orden cancelada desde la terminal. DataId={DataId}",
+                            notification?.Data?.Id);
+                        OnOrderCancelled?.Invoke(this, args);
+                    }
+
+                    // Detectar status action_required
+                    if (notification?.Action == "order.action_required"
+                        || notification?.Action == "action_required")
+                    {
+                        _logger.Warning(
+                            "Orden requiere acción manual del operador. DataId={DataId}. " +
+                            "Registrar manualmente la operación según el estado final en el dispositivo.",
+                            notification?.Data?.Id);
+                        OnActionRequired?.Invoke(this, args);
+                    }
+                }
 
                 // Responder 200 OK a MP
                 response.StatusCode = 200;
