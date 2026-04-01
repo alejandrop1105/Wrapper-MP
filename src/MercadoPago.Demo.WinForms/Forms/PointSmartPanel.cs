@@ -321,6 +321,17 @@ namespace MercadoPago.Demo.WinForms.Forms
                     ShowResult(
                         $"✅ Terminal {device.Id} cambiada a modo {mode}\n\n" +
                         JsonConvert.SerializeObject(result.Data, Formatting.Indented));
+                        
+                    if (mode == "PDV")
+                    {
+                        MessageBox.Show(
+                            "Comando PDV enviado al servidor exitosamente.\n\n" +
+                            "⚠ ATENCIÓN (Checklist Homologación MP):\n" +
+                            "Si la terminal física sigue mostrando el teclado numérico, debes deslizar la barra superior de la pantalla hacia abajo y presionar 'Actualizar' (🔄) para que sincronice su estado.\n\n" +
+                            "Alternativamente, enviar la primera orden (Payment Intent) suele 'despertarla' y forzar el bloqueo automático.",
+                            "Sincronización requerida", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
                     _main.SetStatus($"Terminal en modo {mode}.");
                     BtnRefreshDevices_Click(null, null);
                 }
@@ -373,20 +384,12 @@ namespace MercadoPago.Demo.WinForms.Forms
 
                 var request = new OrderCreateRequest
                 {
-                    Type = "online",
+                    Type = "point",
                     TotalAmount = formattedAmount,
                     ExternalReference = _txtExternalRef.Text.Trim(),
                     Description = _txtDescription.Text.Trim(),
-                    Transactions = new OrderTransactionsRequest
-                    {
-                        Payments = new List<OrderTransactionPaymentRequest>
-                        {
-                            new OrderTransactionPaymentRequest
-                            {
-                                Amount = formattedAmount
-                            }
-                        }
-                    },
+                    // No enviamos Transactions pre-armadas en órdenes point/physical 
+                    // porque el terminal físico es el que genera la transacción y el método de pago al pasar la tarjeta.
                     Config = new OrderConfigRequest
                     {
                         Point = new OrderPointConfigRequest
